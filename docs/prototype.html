@@ -1,0 +1,552 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Aangan Homes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hind:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky search band → filter row → listings grid beside a schematic locality map (map becomes a tab on phones) */
+:root{
+  --bg:#F3F6F7; --surface:#FFFFFF; --sunk:#E8EEF0; --ink:#13232C; --muted:#5B6D77; --line:#D8E1E5;
+  --brand:#0C5A6A; --brand-ink:#FFFFFF; --accent:#E39B12; --accent-soft:#FCEFD3;
+  --good:#23794B; --good-soft:#DDF1E5; --bad:#B23A2A; --bad-soft:#F8E1DD;
+  --mapbg:#E7EFEF; --mapgrid:#D3DFE0; --shadow:0 1px 2px rgba(19,35,44,.06),0 6px 20px rgba(19,35,44,.07);
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Hind", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1418; --surface:#132026; --sunk:#0F1A1F; --ink:#E4EDF0; --muted:#94A7B0; --line:#25363E;
+  --brand:#3BB0C3; --brand-ink:#05252C; --accent:#F0B03A; --accent-soft:#3A2D10;
+  --good:#5CC88A; --good-soft:#123222; --bad:#EE7A68; --bad-soft:#3A1A15;
+  --mapbg:#101C21; --mapgrid:#1B2B32; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1418; --surface:#132026; --sunk:#0F1A1F; --ink:#E4EDF0; --muted:#94A7B0; --line:#25363E;
+  --brand:#3BB0C3; --brand-ink:#05252C; --accent:#F0B03A; --accent-soft:#3A2D10;
+  --good:#5CC88A; --good-soft:#123222; --bad:#EE7A68; --bad-soft:#3A1A15;
+  --mapbg:#101C21; --mapgrid:#1B2B32; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--brand)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:1360px;margin:0 auto}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--brand);color:var(--brand-ink)}
+header.top .inner{display:flex;align-items:center;gap:16px;padding-block:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;white-space:nowrap}
+.logo svg{flex:none}
+.deal{display:flex;background:rgba(255,255,255,.14);border-radius:999px;padding:3px}
+:root[data-theme="dark"] .deal{background:rgba(0,0,0,.15)}
+.deal button{border:0;background:transparent;padding:6px 14px;border-radius:999px;font-weight:600;color:inherit}
+.deal button[aria-pressed="true"]{background:var(--accent);color:#2A1C00}
+.search{flex:1 1 280px;display:flex;align-items:center;gap:8px;background:var(--surface);color:var(--ink);border-radius:10px;padding:4px 4px 4px 12px;min-width:0}
+.search select{border:0;background:transparent;font-weight:600;max-width:130px}
+.search input{border:0;background:transparent;flex:1;min-width:0;padding:8px 4px;outline:none}
+.search .sep{width:1px;height:22px;background:var(--line)}
+.hbtn{border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;border-radius:10px;padding:8px 12px;font-weight:600;white-space:nowrap}
+.hbtn.solid{background:var(--accent);border-color:var(--accent);color:#2A1C00}
+.hbtn .count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:rgba(255,255,255,.22);font-size:12px}
+
+/* filters */
+.filters .inner{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-block:12px;border-bottom:1px solid var(--line)}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:500;font-size:14px}
+.chip[aria-pressed="true"]{border-color:var(--brand);background:var(--brand);color:var(--brand-ink)}
+.fsel{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 10px;font-size:14px}
+.flabel{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:6px}
+.spacer{flex:1}
+
+/* main */
+main .inner{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:24px;padding-block:20px 48px}
+.summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.summary h1{font-family:var(--display);font-size:clamp(22px,3vw,30px);line-height:1.15;margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.summary p{margin:0;color:var(--muted)}
+.sample{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:2px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s, box-shadow .15s, border-color .15s;cursor:pointer;text-align:left;padding:0}
+.card:hover,.card.hot{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--brand)}
+.thumb{position:relative;aspect-ratio:16/10;max-width:100%;overflow:hidden;background:var(--sunk)}
+.thumb svg{display:block;width:100%;height:100%}
+.tags{position:absolute;left:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{background:rgba(255,255,255,.92);color:#13232C;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:5px}
+.tag.new{background:#E39B12;color:#2A1C00}
+.heart{position:absolute;right:8px;top:8px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.92);display:grid;place-items:center}
+.heart svg{width:18px;height:18px}
+.heart[aria-pressed="true"] path{fill:#D2402F;stroke:#D2402F}
+.cbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+.price{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.price small{font-family:var(--body);font-weight:500;font-size:13px;color:var(--muted)}
+.facts{font-weight:600}
+.facts span+span::before{content:"·";margin:0 6px;color:var(--muted)}
+.where{color:var(--muted);font-size:14px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:6px;align-self:flex-start}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.flat{background:var(--sunk);color:var(--muted)}
+.empty{grid-column:1/-1;background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:32px;text-align:center;color:var(--muted)}
+
+/* map */
+.mapcol{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);align-self:start}
+.mapbox{background:var(--mapbg);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.maphead{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface);gap:8px}
+.maphead b{font-family:var(--display)}
+.maphead span{font-size:12px;color:var(--muted)}
+#map{display:block;width:100%;height:auto;max-height:calc(100vh - 220px)}
+.legend{display:flex;gap:14px;padding:8px 14px;font-size:12px;color:var(--muted);background:var(--surface);border-top:1px solid var(--line);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.pin{cursor:pointer}
+.pin rect{fill:var(--brand);stroke:var(--surface);stroke-width:1.5}
+.pin text{fill:var(--brand-ink);font:700 11px var(--body)}
+.pin.hot rect,.pin:hover rect{fill:var(--accent)}
+.pin.hot text,.pin:hover text{fill:#2A1C00}
+.mobtabs{display:none}
+
+/* dialog */
+dialog{border:0;padding:0;background:var(--surface);color:var(--ink);border-radius:16px;width:min(920px,calc(100vw - 32px));max-height:calc(100vh - 32px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(8,20,26,.55)}
+.dlg{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.dlg .hero{position:relative;background:var(--sunk);min-height:100%}
+.dlg .hero svg{display:block;width:100%;height:100%;min-height:280px}
+.dlg .side{padding:22px;display:flex;flex-direction:column;gap:16px;overflow:auto;max-height:calc(100vh - 32px)}
+.x{position:absolute;right:12px;top:12px;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#13232C;font-size:20px;line-height:1;z-index:2}
+.dlg h2{font-family:var(--display);font-size:26px;margin:0;letter-spacing:-.02em;line-height:1.15;text-wrap:balance}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kv div{background:var(--surface);padding:8px 10px}
+.kv dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kv dd{margin:0;font-weight:600}
+.sect h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+.amen{display:flex;flex-wrap:wrap;gap:6px}
+.amen span{background:var(--sunk);border-radius:6px;padding:3px 9px;font-size:13px}
+.bar{position:relative;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--good-soft),var(--sunk),var(--bad-soft));margin:26px 0 6px}
+.bar .mk{position:absolute;top:-22px;transform:translateX(-50%);font-size:11px;font-weight:700;white-space:nowrap}
+.bar .mk::after{content:"";position:absolute;left:50%;top:18px;width:2px;height:14px;background:currentColor;transform:translateX(-50%)}
+.bar .mk.est{color:var(--muted)}
+.bar .mk.you{color:var(--brand)}
+.barlbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.emi{background:var(--sunk);border-radius:12px;padding:14px;display:grid;gap:10px}
+.emi .out{font-family:var(--display);font-size:24px;font-weight:800}
+.emi label{display:grid;grid-template-columns:110px 1fr 70px;align-items:center;gap:8px;font-size:13px}
+.emi input[type=range]{width:100%;accent-color:var(--brand)}
+.emi output{text-align:right;font-weight:600}
+.agent{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px}
+.av{width:44px;height:44px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-weight:700;font-family:var(--display);flex:none}
+.agent .who{flex:1;min-width:0}
+.agent .ph{font-weight:600;user-select:all}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:600;background:var(--brand);color:var(--brand-ink)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+form.enq,form.post{display:grid;gap:10px}
+.field{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;color:var(--ink);font-size:15px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note{font-size:13px;color:var(--muted)}
+.ok{background:var(--good-soft);color:var(--good);border-radius:8px;padding:8px 10px;font-size:14px}
+.err{color:var(--bad);font-size:13px}
+.postdlg{padding:22px;display:grid;gap:14px;max-height:calc(100vh - 32px);overflow:auto;position:relative}
+.postdlg .x{background:var(--sunk);color:var(--ink)}
+.leads{display:grid;gap:8px}
+.lead{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.lead b{display:block}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:60;box-shadow:var(--shadow)}
+
+@media (max-width:980px){
+  main .inner{grid-template-columns:minmax(0,1fr)}
+  .mapcol{position:static}
+  .mobtabs{display:flex;gap:6px;margin-bottom:12px}
+  main[data-view="list"] .mapcol{display:none}
+  main[data-view="map"] .listcol{display:none}
+  #map{max-height:none}
+}
+@media (max-width:720px){
+  .dlg{grid-template-columns:minmax(0,1fr)}
+  .dlg .hero svg{min-height:200px;max-height:240px}
+  .dlg .side{max-height:none}
+  dialog{width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow:auto}
+  .kv{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .emi label{grid-template-columns:90px 1fr 60px}
+  .logo span.full{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top wrap">
+  <div class="inner">
+    <div class="logo" aria-label="Aangan Homes">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="7" fill="#E39B12"/><path d="M7 21V13l8-6 8 6v8h-5v-5h-6v5z" fill="#0C5A6A"/><circle cx="15" cy="12" r="1.6" fill="#E39B12"/></svg>
+      <span>Aangan<span class="full"> Homes</span></span>
+    </div>
+    <div class="deal" role="group" aria-label="Buy or rent">
+      <button type="button" data-deal="buy" aria-pressed="true">Buy</button>
+      <button type="button" data-deal="rent" aria-pressed="false">Rent</button>
+    </div>
+    <div class="search">
+      <select id="city" aria-label="City"></select>
+      <span class="sep"></span>
+      <input id="q" type="search" placeholder="Locality, project or landmark" aria-label="Search locality">
+    </div>
+    <button class="hbtn" id="savedBtn" type="button" aria-pressed="false">Saved <span class="count" id="savedCount">0</span></button>
+    <button class="hbtn" id="leadsBtn" type="button">Enquiries <span class="count" id="leadCount">0</span></button>
+    <button class="hbtn solid" id="postBtn" type="button">Post property</button>
+  </div>
+</header>
+
+<section class="filters wrap">
+  <div class="inner" id="filterRow">
+    <span class="flabel">BHK</span>
+    <div id="bhkChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <span class="flabel">Type</span>
+    <select class="fsel" id="type" aria-label="Property type">
+      <option value="">All types</option><option>Apartment</option><option>Villa</option><option>Independent House</option><option>Plot</option>
+    </select>
+    <span class="flabel">Budget</span>
+    <select class="fsel" id="maxp" aria-label="Maximum budget"></select>
+    <select class="fsel" id="status" aria-label="Possession">
+      <option value="">Any possession</option><option value="ready">Ready to move</option><option value="uc">Under construction</option>
+    </select>
+    <span class="spacer"></span>
+    <select class="fsel" id="sort" aria-label="Sort">
+      <option value="new">Newest first</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option><option value="psf">Best value (₹/sq ft)</option><option value="deal">Biggest discount vs estimate</option>
+    </select>
+  </div>
+</section>
+
+<main class="wrap" data-view="list">
+  <div class="inner">
+    <div class="listcol">
+      <div class="summary">
+        <div>
+          <h1 id="headline">Homes for sale in Chennai</h1>
+          <p id="subline"></p>
+        </div>
+        <span class="sample">Sample listings · indicative locality rates</span>
+      </div>
+      <div class="mobtabs" role="group" aria-label="View">
+        <button class="chip" type="button" data-view="list" aria-pressed="true">List</button>
+        <button class="chip" type="button" data-view="map" aria-pressed="false">Map</button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <aside class="mapcol">
+      <div class="mobtabs" role="group" aria-label="View">
+        <button class="chip" type="button" data-view="list" aria-pressed="false">List</button>
+        <button class="chip" type="button" data-view="map" aria-pressed="true">Map</button>
+      </div>
+      <div class="mapbox">
+        <div class="maphead"><b id="mapTitle">Chennai</b><span>Circles show avg ₹/sq ft by locality</span></div>
+        <svg id="map" viewBox="0 0 440 520" role="img" aria-label="Locality map with listing pins"></svg>
+        <div class="legend"><span><i style="background:var(--brand)"></i>Listing</span><span><i style="background:var(--accent)"></i>Selected</span><span><i style="background:transparent;border:1.5px solid var(--muted)"></i>Locality rate</span></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<dialog id="detail"></dialog>
+<dialog id="post"></dialog>
+<dialog id="leads"></dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const LOC = {
+  Chennai:{state:"TN",deposit:3,locs:{
+    "Adyar":[13.0012,80.2565,17000,42],"Anna Nagar":[13.0850,80.2101,15500,34],"Velachery":[12.9815,80.2180,9500,26],
+    "OMR Sholinganallur":[12.9010,80.2279,7200,22],"T Nagar":[13.0418,80.2341,18000,40],"Porur":[13.0382,80.1565,7000,21],"Tambaram":[12.9249,80.1000,5800,16]}},
+  Bengaluru:{state:"KA",deposit:6,locs:{
+    "Indiranagar":[12.9719,77.6412,19000,55],"Whitefield":[12.9698,77.7500,8500,32],"Koramangala":[12.9352,77.6245,17500,50],
+    "HSR Layout":[12.9116,77.6474,13000,42],"Hebbal":[13.0358,77.5970,12000,36],"Electronic City":[12.8452,77.6602,6200,22],"Sarjapur Road":[12.9100,77.6850,8000,30]}},
+  Mumbai:{state:"MH",deposit:3,locs:{
+    "Bandra West":[19.0596,72.8295,55000,120],"Andheri West":[19.1364,72.8296,32000,75],"Powai":[19.1176,72.9060,27000,68],
+    "Thane West":[19.2183,72.9781,15500,40],"Kharghar":[19.0473,73.0699,12000,30],"Goregaon East":[19.1663,72.8526,24000,58]}},
+  Hyderabad:{state:"TS",deposit:2,locs:{
+    "Gachibowli":[17.4401,78.3489,9800,34],"Kondapur":[17.4622,78.3568,9000,30],"Banjara Hills":[17.4126,78.4482,16000,45],
+    "Kokapet":[17.3964,78.3248,10500,33],"Kukatpally":[17.4849,78.4138,7200,24]}},
+  Pune:{state:"MH",deposit:3,locs:{
+    "Baner":[18.5590,73.7868,11500,34],"Kharadi":[18.5515,73.9348,10000,32],"Hinjewadi":[18.5913,73.7389,7800,26],
+    "Koregaon Park":[18.5362,73.8939,16000,48],"Wakad":[18.5975,73.7707,8200,27]}}
+};
+const L = (d,city,loc,type,bhk,area,price,title,extra)=>Object.assign({deal:d,city,loc,type,bhk,area,price,title},extra);
+const BASE = [
+ L("buy","Chennai","Adyar","Apartment",3,1650,29500000,"Sea-breeze 3BHK near Gandhi Nagar",{bath:3,floor:"4 of 6",facing:"East",furn:"Semi-furnished",poss:"Ready to move",age:"3 yrs",days:2,agent:"Lakshmi Narayanan",firm:"Coastline Realty",ph:"+91 98400 21734",am:["Covered parking","Power backup","Lift","Gym","Rainwater harvesting","24×7 security"]}),
+ L("buy","Chennai","Velachery","Apartment",2,1080,9800000,"2BHK near Phoenix Marketcity",{bath:2,floor:"7 of 12",facing:"North",furn:"Unfurnished",poss:"Ready to move",age:"5 yrs",days:6,agent:"Karthik Sundaram",firm:"Southside Homes",ph:"+91 94440 58216",am:["Lift","Power backup","Clubhouse","Children's play area","Metro water"]}),
+ L("buy","Chennai","OMR Sholinganallur","Villa",4,2800,21000000,"Gated villa with private garden",{bath:4,floor:"G+1",facing:"East",furn:"Semi-furnished",poss:"Ready to move",age:"New",days:1,agent:"Priya Venkatesh",firm:"IT Corridor Estates",ph:"+91 98841 30927",am:["Private garden","2 car parks","Swimming pool","Clubhouse","Solar water heater","Borewell"]}),
+ L("rent","Chennai","Anna Nagar","Apartment",2,1150,38000,"2BHK off 2nd Avenue, family preferred",{bath:2,floor:"2 of 4",facing:"North",furn:"Semi-furnished",poss:"Available now",age:"8 yrs",days:3,agent:"Karthik Sundaram",firm:"Southside Homes",ph:"+91 94440 58216",am:["Car parking","Power backup","Metro water","Borewell"]}),
+ L("buy","Chennai","Tambaram","Plot",0,2400,13200000,"DTCP approved corner plot",{bath:0,floor:"—",facing:"North-East",furn:"—",poss:"Ready to register",age:"—",days:12,agent:"Lakshmi Narayanan",firm:"Coastline Realty",ph:"+91 98400 21734",am:["DTCP approved","Corner plot","40 ft road","Clear title","EB connection nearby"]}),
+ L("rent","Chennai","T Nagar","Independent House",3,1900,75000,"Independent house near Pondy Bazaar",{bath:3,floor:"G+1",facing:"East",furn:"Unfurnished",poss:"Available 1 Dec",age:"15 yrs",days:9,agent:"Priya Venkatesh",firm:"IT Corridor Estates",ph:"+91 98841 30927",am:["2 car parks","Terrace","Borewell","Pooja room"]}),
+ L("buy","Chennai","Porur","Apartment",3,1420,10200000,"New launch near Porur junction",{bath:2,floor:"9 of 14",facing:"West",furn:"Unfurnished",poss:"Under construction · Dec 2027",age:"New",days:4,agent:"Karthik Sundaram",firm:"Southside Homes",ph:"+91 94440 58216",am:["Swimming pool","Gym","Clubhouse","EV charging","Jogging track"]}),
+ L("buy","Bengaluru","Whitefield","Apartment",3,1750,15500000,"3BHK near ITPL, lake view",{bath:3,floor:"11 of 18",facing:"East",furn:"Semi-furnished",poss:"Ready to move",age:"2 yrs",days:2,agent:"Ananya Rao",firm:"Namma Nest Realty",ph:"+91 98450 61302",am:["Swimming pool","Gym","Clubhouse","EV charging","Power backup"]}),
+ L("rent","Bengaluru","Koramangala","Apartment",2,1200,58000,"Furnished 2BHK in 5th Block",{bath:2,floor:"3 of 5",facing:"North",furn:"Fully furnished",poss:"Available now",age:"6 yrs",days:1,agent:"Rohan Shetty",firm:"Garden City Homes",ph:"+91 99001 42876",am:["Lift","Power backup","Covered parking","Pet friendly"]}),
+ L("buy","Bengaluru","Sarjapur Road","Villa",4,3200,27500000,"Villa in gated community",{bath:4,floor:"G+2",facing:"North",furn:"Semi-furnished",poss:"Ready to move",age:"1 yr",days:7,agent:"Ananya Rao",firm:"Namma Nest Realty",ph:"+91 98450 61302",am:["Private garden","Clubhouse","Tennis court","Swimming pool","24×7 security"]}),
+ L("buy","Bengaluru","Electronic City","Apartment",2,1150,6800000,"Value 2BHK in Phase 1",{bath:2,floor:"5 of 10",facing:"East",furn:"Unfurnished",poss:"Ready to move",age:"4 yrs",days:15,agent:"Rohan Shetty",firm:"Garden City Homes",ph:"+91 99001 42876",am:["Lift","Gym","Power backup","Children's play area"]}),
+ L("rent","Bengaluru","HSR Layout","Apartment",3,1600,70000,"3BHK in Sector 2, near BDA complex",{bath:3,floor:"2 of 4",facing:"East",furn:"Semi-furnished",poss:"Available 15 Nov",age:"7 yrs",days:5,agent:"Rohan Shetty",firm:"Garden City Homes",ph:"+91 99001 42876",am:["Covered parking","Power backup","Lift"]}),
+ L("buy","Bengaluru","Hebbal","Apartment",3,1850,23500000,"Premium tower near Hebbal lake",{bath:3,floor:"21 of 32",facing:"North",furn:"Unfurnished",poss:"Under construction · Jun 2028",age:"New",days:3,agent:"Ananya Rao",firm:"Namma Nest Realty",ph:"+91 98450 61302",am:["Infinity pool","Sky lounge","Gym","EV charging","Concierge"]}),
+ L("buy","Mumbai","Andheri West","Apartment",2,850,28500000,"2BHK off Lokhandwala Back Road",{bath:2,floor:"14 of 22",facing:"West",furn:"Semi-furnished",poss:"Ready to move",age:"6 yrs",days:2,agent:"Farah Merchant",firm:"Westline Properties",ph:"+91 98200 37415",am:["Lift","Gym","Swimming pool","Covered parking","Society office"]}),
+ L("rent","Mumbai","Bandra West","Apartment",1,550,72000,"1BHK near Carter Road",{bath:1,floor:"3 of 7",facing:"West",furn:"Fully furnished",poss:"Available now",age:"20 yrs",days:4,agent:"Farah Merchant",firm:"Westline Properties",ph:"+91 98200 37415",am:["Lift","Watchman","Sea-facing balcony"]}),
+ L("buy","Mumbai","Powai","Apartment",3,1250,36000000,"3BHK in Hiranandani Gardens",{bath:3,floor:"18 of 25",facing:"East",furn:"Semi-furnished",poss:"Ready to move",age:"10 yrs",days:8,agent:"Sameer Kulkarni",firm:"Lakeview Realtors",ph:"+91 98197 64028",am:["Lake view","Clubhouse","Gym","Swimming pool","Power backup"]}),
+ L("buy","Mumbai","Thane West","Apartment",2,900,14200000,"2BHK on Ghodbunder Road",{bath:2,floor:"12 of 30",facing:"North",furn:"Unfurnished",poss:"Under construction · Mar 2027",age:"New",days:1,agent:"Sameer Kulkarni",firm:"Lakeview Realtors",ph:"+91 98197 64028",am:["Clubhouse","Swimming pool","EV charging","Kids' play area"]}),
+ L("rent","Mumbai","Kharghar","Apartment",2,950,32000,"2BHK in Sector 35, near Central Park",{bath:2,floor:"6 of 14",facing:"East",furn:"Semi-furnished",poss:"Available now",age:"9 yrs",days:11,agent:"Sameer Kulkarni",firm:"Lakeview Realtors",ph:"+91 98197 64028",am:["Lift","Covered parking","Gym"]}),
+ L("buy","Hyderabad","Kokapet","Villa",4,3600,39500000,"Triplex villa near Neopolis",{bath:5,floor:"G+2",facing:"East",furn:"Semi-furnished",poss:"Ready to move",age:"New",days:3,agent:"Srinivas Reddy",firm:"Deccan Keys",ph:"+91 98490 25713",am:["Private lift","Home theatre","Clubhouse","Swimming pool","24×7 security"]}),
+ L("buy","Hyderabad","Gachibowli","Apartment",3,1800,17800000,"3BHK near Financial District",{bath:3,floor:"15 of 30",facing:"East",furn:"Unfurnished",poss:"Ready to move",age:"2 yrs",days:6,agent:"Srinivas Reddy",firm:"Deccan Keys",ph:"+91 98490 25713",am:["Swimming pool","Gym","Clubhouse","EV charging","Power backup"]}),
+ L("rent","Hyderabad","Kondapur","Apartment",2,1250,36000,"2BHK near Botanical Garden",{bath:2,floor:"8 of 12",facing:"North",furn:"Semi-furnished",poss:"Available now",age:"5 yrs",days:2,agent:"Meghana Rao",firm:"Cyberabad Homes",ph:"+91 99490 83126",am:["Lift","Gym","Power backup","Covered parking"]}),
+ L("buy","Hyderabad","Kukatpally","Plot",0,1800,10500000,"HMDA approved plot near KPHB",{bath:0,floor:"—",facing:"East",furn:"—",poss:"Ready to register",age:"—",days:14,agent:"Meghana Rao",firm:"Cyberabad Homes",ph:"+91 99490 83126",am:["HMDA approved","30 ft road","Clear title","Gated layout"]}),
+ L("buy","Pune","Baner","Apartment",2,1050,12500000,"2BHK with hill view, Baner-Pashan Link Rd",{bath:2,floor:"9 of 16",facing:"North",furn:"Semi-furnished",poss:"Ready to move",age:"3 yrs",days:5,agent:"Aditi Joshi",firm:"Sahyadri Realty",ph:"+91 98220 46519",am:["Hill view","Clubhouse","Gym","Swimming pool"]}),
+ L("rent","Pune","Kharadi","Apartment",3,1450,45000,"3BHK near EON IT Park",{bath:3,floor:"10 of 20",facing:"East",furn:"Semi-furnished",poss:"Available now",age:"4 yrs",days:3,agent:"Aditi Joshi",firm:"Sahyadri Realty",ph:"+91 98220 46519",am:["Lift","Gym","Swimming pool","Covered parking"]}),
+ L("buy","Pune","Koregaon Park","Independent House",4,3000,46000000,"Bungalow on a quiet lane",{bath:4,floor:"G+1",facing:"North-East",furn:"Fully furnished",poss:"Ready to move",age:"12 yrs",days:10,agent:"Vikram Deshpande",firm:"Deccan Gymkhana Estates",ph:"+91 98230 17384",am:["Private garden","3 car parks","Servant quarters","Borewell"]}),
+ L("buy","Pune","Hinjewadi","Apartment",1,650,5200000,"1BHK near Phase 2, good rental yield",{bath:1,floor:"6 of 22",facing:"West",furn:"Unfurnished",poss:"Under construction · Sep 2027",age:"New",days:1,agent:"Vikram Deshpande",firm:"Deccan Gymkhana Estates",ph:"+91 98230 17384",am:["Clubhouse","Gym","Co-working lounge","EV charging"]})
+];
+BASE.forEach((l,i)=>{l.id="s"+(i+1);l.hue=(i*47)%360});
+
+// ---- storage (per-device conveniences) ----
+const store={get(k,d){try{const v=localStorage.getItem("aangan:"+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem("aangan:"+k,JSON.stringify(v))}catch(e){}}};
+let saved=new Set(store.get("saved",[])), mine=store.get("mine",[]), leads=store.get("leads",[]);
+const all=()=>mine.concat(BASE);
+
+// ---- helpers ----
+const inr=n=>Math.round(n).toLocaleString("en-IN");
+function money(n){ if(n>=1e7) return "₹"+(n/1e7).toFixed(n>=1e8?1:2).replace(/\.?0+$/,"")+" Cr"; if(n>=1e5) return "₹"+(n/1e5).toFixed(1).replace(/\.0$/,"")+" L"; return "₹"+inr(n) }
+function short(l){ return l.deal==="rent" ? (l.price>=1e5? "₹"+(l.price/1e5).toFixed(1).replace(/\.0$/,"")+"L" : "₹"+Math.round(l.price/1000)+"k") : money(l.price).replace(" ","") }
+function estimate(l){ const r=LOC[l.city].locs[l.loc]; const rate=l.deal==="rent"?r[3]:r[2]; let k=1; if(l.type==="Villa"||l.type==="Independent House")k=1.08; if(l.type==="Plot")k=.95; return rate*l.area*k }
+function diffPct(l){ return (l.price/estimate(l)-1)*100 }
+function rera(l){ const n=(parseInt(l.id.replace(/\D/g,""))||7)*3917%99999; const s=LOC[l.city].state;
+  if(l.type==="Plot"&&s==="TN")return "TN/01/Layout/"+String(n).padStart(4,"0").slice(-4)+"/2025";
+  return {TN:"TN/29/Building/"+String(n).slice(-4).padStart(4,"0")+"/2025",KA:"PRM/KA/RERA/1251/446/PR/"+String(200000+n),MH:"P5"+(l.city==="Pune"?"21":"18")+"000"+String(n).padStart(5,"0"),TS:"P024000"+String(n).padStart(5,"0")}[s] }
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function jitter(id){ let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))|0; return [((h&255)/255-.5)*.012, (((h>>8)&255)/255-.5)*.012] }
+
+// ---- illustration ----
+function art(l){
+  const h=l.hue, sky1=`hsl(${(h+190)%360} 60% 82%)`, sky2=`hsl(${(h+200)%360} 55% 93%)`, wall=`hsl(${h} 35% 88%)`, wall2=`hsl(${h} 30% 74%)`, trim=`hsl(${(h+20)%360} 45% 38%)`, win="hsl(200 40% 36%)", ground="hsl(95 30% 62%)";
+  let b="";
+  if(l.type==="Apartment"){
+    const floors=l.bhk>=3?9:7, w=110, x=145, top=170-floors*14;
+    b+=`<rect x="${x-70}" y="${top+40}" width="70" height="${170-top-40}" fill="${wall2}"/>`;
+    b+=`<rect x="${x}" y="${top}" width="${w}" height="${170-top}" fill="${wall}"/><rect x="${x-4}" y="${top-6}" width="${w+8}" height="8" fill="${trim}"/>`;
+    for(let f=0;f<floors;f++){for(let c=0;c<4;c++){b+=`<rect x="${x+10+c*25}" y="${top+8+f*14}" width="16" height="8" rx="1" fill="${(f*4+c+h)%7===0?'#F6D27A':win}"/>`}}
+    for(let f=0;f<5;f++)b+=`<rect x="${x-60}" y="${top+50+f*14}" width="50" height="7" fill="${win}" opacity=".55"/>`;
+    b+=`<rect x="${x+w+10}" y="${top+60}" width="60" height="${170-top-60}" fill="${wall2}" opacity=".8"/>`;
+  } else if(l.type==="Plot"){
+    b+=`<polygon points="40,150 360,150 330,120 80,120" fill="hsl(40 45% 70%)"/>`;
+    [[80,120],[330,120],[40,150],[360,150]].forEach(p=>b+=`<rect x="${p[0]-3}" y="${p[1]-12}" width="6" height="12" fill="#fff" stroke="${trim}"/>`);
+    b+=`<rect x="190" y="88" width="4" height="40" fill="${trim}"/><rect x="160" y="72" width="64" height="24" rx="2" fill="#fff" stroke="${trim}"/><text x="192" y="88" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="${trim}">${l.area} sq ft</text>`;
+  } else {
+    const tall=l.type==="Villa";
+    b+=`<rect x="120" y="${tall?80:95}" width="160" height="${tall?90:75}" fill="${wall}"/><polygon points="108,${tall?82:97} 200,${tall?40:58} 292,${tall?82:97}" fill="${trim}"/>`;
+    b+=`<rect x="185" y="125" width="30" height="45" fill="${trim}"/><rect x="135" y="${tall?95:110}" width="30" height="22" fill="${win}"/><rect x="235" y="${tall?95:110}" width="30" height="22" fill="${win}"/>`;
+    if(tall)b+=`<rect x="135" y="135" width="30" height="22" fill="${win}"/><rect x="235" y="135" width="30" height="22" fill="#F6D27A"/><rect x="225" y="122" width="50" height="4" fill="${trim}"/>`;
+    b+=`<rect x="290" y="130" width="70" height="40" fill="${wall2}"/>`;
+  }
+  // coconut palm
+  b+=`<path d="M60 170 Q64 120 70 92" stroke="hsl(30 35% 35%)" stroke-width="5" fill="none"/><g fill="hsl(120 35% 36%)"><path d="M70 92 q-30 -4 -40 14 q18 -14 40 -14z"/><path d="M70 92 q30 -6 40 10 q-20 -10 -40 -10z"/><path d="M70 92 q-14 -24 -34 -26 q20 10 34 26z"/><path d="M70 92 q12 -26 32 -28 q-18 12 -32 28z"/></g>`;
+  return `<svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="g${l.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky1}"/><stop offset="1" stop-color="${sky2}"/></linearGradient></defs><rect width="400" height="250" fill="url(#g${l.id})"/><circle cx="340" cy="45" r="18" fill="hsl(42 95% 70%)"/><rect y="165" width="400" height="85" fill="${ground}"/><rect y="200" width="400" height="22" fill="hsl(220 8% 55%)"/><g stroke="#fff" stroke-width="2" stroke-dasharray="14 12"><line x1="0" y1="211" x2="400" y2="211"/></g><g transform="translate(0,0)">${b}</g></svg>`;
+}
+
+// ---- state ----
+const S={deal:"buy",city:"Chennai",q:"",bhk:new Set(),type:"",maxp:"",status:"",sort:"new",savedOnly:false,hot:null};
+const BUDGET={buy:[["","Any budget"],[5e6,"Up to ₹50 L"],[7.5e6,"Up to ₹75 L"],[1e7,"Up to ₹1 Cr"],[1.5e7,"Up to ₹1.5 Cr"],[2e7,"Up to ₹2 Cr"],[3e7,"Up to ₹3 Cr"],[5e7,"Up to ₹5 Cr"]],
+  rent:[["","Any rent"],[20000,"Up to ₹20k/mo"],[35000,"Up to ₹35k/mo"],[50000,"Up to ₹50k/mo"],[75000,"Up to ₹75k/mo"],[100000,"Up to ₹1 L/mo"]]};
+const $=s=>document.querySelector(s);
+
+function setupControls(){
+  $("#city").innerHTML=Object.keys(LOC).map(c=>`<option>${c}</option>`).join("");
+  $("#bhkChips").innerHTML=["1","2","3","4+"].map(b=>`<button class="chip" type="button" data-bhk="${b}" aria-pressed="false">${b} BHK</button>`).join("");
+  fillBudget();
+}
+function fillBudget(){ $("#maxp").innerHTML=BUDGET[S.deal].map(([v,t])=>`<option value="${v}">${t}</option>`).join(""); S.maxp="" }
+
+function filtered(){
+  const q=S.q.trim().toLowerCase();
+  let r=all().filter(l=>l.deal===S.deal && l.city===S.city);
+  if(S.savedOnly) r=r.filter(l=>saved.has(l.id));
+  if(q) r=r.filter(l=>(l.loc+" "+l.title+" "+l.type).toLowerCase().includes(q));
+  if(S.bhk.size) r=r.filter(l=>[...S.bhk].some(b=>b==="4+"?l.bhk>=4:l.bhk===+b));
+  if(S.type) r=r.filter(l=>l.type===S.type);
+  if(S.maxp) r=r.filter(l=>l.price<=+S.maxp);
+  if(S.status==="ready") r=r.filter(l=>!/Under construction/.test(l.poss));
+  if(S.status==="uc") r=r.filter(l=>/Under construction/.test(l.poss));
+  const k={new:(a,b)=>a.days-b.days,lo:(a,b)=>a.price-b.price,hi:(a,b)=>b.price-a.price,psf:(a,b)=>a.price/a.area-b.price/b.area,deal:(a,b)=>diffPct(a)-diffPct(b)}[S.sort];
+  return r.sort(k);
+}
+
+function pill(l){ const d=diffPct(l); if(Math.abs(d)<3) return `<span class="pill flat">In line with locality estimate</span>`;
+  return d<0?`<span class="pill good">▼ ${Math.abs(d).toFixed(0)}% below estimate</span>`:`<span class="pill bad">▲ ${d.toFixed(0)}% above estimate</span>` }
+function facts(l){ return (l.bhk?`<span>${l.bhk} BHK</span>`:"")+`<span>${inr(l.area)} sq ft</span><span>${l.type}</span>` }
+function priceLine(l){ return l.deal==="rent"?`${money(l.price)}<small>/month</small>`:`${money(l.price)}<small>₹${inr(l.price/l.area)}/sq ft</small>` }
+
+function render(){
+  const r=filtered();
+  const word=S.deal==="buy"?"for sale":"for rent";
+  $("#headline").textContent=(S.savedOnly?"Saved homes ":"Homes ")+word+" in "+S.city;
+  if(r.length){ const ps=r.map(l=>l.price).sort((a,b)=>a-b); const med=ps[Math.floor(ps.length/2)];
+    $("#subline").textContent=`${r.length} ${r.length===1?"listing":"listings"} · median ${money(med)}${S.deal==="rent"?"/month":""}`;
+  } else $("#subline").textContent="No listings match these filters";
+  $("#grid").innerHTML=r.length? r.map(l=>`
+    <article class="card" data-id="${l.id}" tabindex="0" role="button" aria-label="${esc(l.title)}, ${money(l.price)}">
+      <div class="thumb">${art(l)}
+        <div class="tags">${l.days<=2?'<span class="tag new">New</span>':""}${/Under/.test(l.poss)?'<span class="tag">Under construction</span>':(l.deal==="buy"?'<span class="tag">Ready to move</span>':"")}${l.mine?'<span class="tag">Your listing</span>':""}</div>
+        <button class="heart" type="button" data-save="${l.id}" aria-pressed="${saved.has(l.id)}" aria-label="Save"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9.2-8.8C1.3 8.1 3.3 4.5 6.8 4.5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.5 0 5.5 3.6 4 6.7C19 15.6 12 20 12 20z" fill="none" stroke="#13232C" stroke-width="1.8"/></svg></button>
+      </div>
+      <div class="cbody">
+        <div class="price">${priceLine(l)}</div>
+        <div class="facts">${facts(l)}</div>
+        <div class="where">${esc(l.title)} · ${l.loc}, ${l.city}</div>
+        ${pill(l)}
+      </div>
+    </article>`).join("") : `<div class="empty"><b>No ${S.savedOnly?"saved ":""}homes match.</b><br>Try a higher budget, another BHK, or clear the locality search.</div>`;
+  $("#savedCount").textContent=saved.size; $("#leadCount").textContent=leads.length;
+  drawMap(r);
+}
+
+// ---- map ----
+function drawMap(r){
+  const c=LOC[S.city], pts=Object.values(c.locs);
+  const lats=pts.map(p=>p[0]), lngs=pts.map(p=>p[1]);
+  let a=Math.min(...lats),b=Math.max(...lats),x0=Math.min(...lngs),x1=Math.max(...lngs);
+  const padY=(b-a)*.18+.01, padX=(x1-x0)*.18+.01; a-=padY;b+=padY;x0-=padX;x1+=padX;
+  const W=440,H=520, sx=W/(x1-x0), sy=H/(b-a), s=Math.min(sx,sy), ox=(W-(x1-x0)*s)/2, oy=(H-(b-a)*s)/2;
+  const P=(lat,lng)=>[ox+(lng-x0)*s, oy+(b-lat)*s];
+  const rates=pts.map(p=>p[S.deal==="rent"?3:2]), rmax=Math.max(...rates), rmin=Math.min(...rates);
+  let g=`<rect width="${W}" height="${H}" fill="var(--mapbg)"/>`;
+  for(let i=40;i<W;i+=40) g+=`<line x1="${i}" y1="0" x2="${i}" y2="${H}" stroke="var(--mapgrid)"/>`;
+  for(let i=40;i<H;i+=40) g+=`<line x1="0" y1="${i}" x2="${W}" y2="${i}" stroke="var(--mapgrid)"/>`;
+  // faint arterial roads between localities
+  const lp=Object.entries(c.locs).map(([n,p])=>[n,P(p[0],p[1]),p]);
+  lp.forEach(([n,q],i)=>{const nxt=lp[(i+1)%lp.length][1]; g+=`<line x1="${q[0]}" y1="${q[1]}" x2="${nxt[0]}" y2="${nxt[1]}" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>`});
+  lp.forEach(([n,q,p])=>{const rate=p[S.deal==="rent"?3:2], rad=22+26*(rate-rmin)/((rmax-rmin)||1);
+    g+=`<circle cx="${q[0]}" cy="${q[1]}" r="${rad}" fill="var(--brand)" fill-opacity=".07" stroke="var(--muted)" stroke-opacity=".5" stroke-dasharray="3 3"/>`;
+    const ty=Math.min(H-8,q[1]+rad+14);
+    g+=`<text x="${q[0]}" y="${ty}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)" font-family="Hind,sans-serif">${n}</text><text x="${q[0]}" y="${ty+13}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="Hind,sans-serif">₹${inr(rate)}/sq ft${S.deal==="rent"?"/mo":""}</text>`;
+  });
+  r.slice().sort((p,q)=>(p.id===S.hot)-(q.id===S.hot)).forEach(l=>{const L0=c.locs[l.loc], j=jitter(l.id); const [x,y]=P(L0[0]+j[0],L0[1]+j[1]); const t=short(l), w=t.length*7+14;
+    g+=`<g class="pin${l.id===S.hot?" hot":""}" data-id="${l.id}" tabindex="0" role="button" aria-label="${esc(l.title)}"><rect x="${Math.max(2,Math.min(W-w-2,x-w/2))}" y="${y-24}" width="${w}" height="20" rx="10"/><text x="${Math.max(2,Math.min(W-w-2,x-w/2))+w/2}" y="${y-10}" text-anchor="middle">${t}</text></g>`});
+  $("#map").innerHTML=g; $("#mapTitle").textContent=S.city+(S.deal==="rent"?" · rents":" · sale prices");
+}
+function setHot(id){ S.hot=id; document.querySelectorAll(".card").forEach(c=>c.classList.toggle("hot",c.dataset.id===id)); document.querySelectorAll(".pin").forEach(p=>p.classList.toggle("hot",p.dataset.id===id)); const p=document.querySelector(`.pin[data-id="${id}"]`); if(p) p.parentNode.appendChild(p) }
+
+// ---- detail ----
+function openDetail(id){
+  const l=all().find(x=>x.id===id); if(!l) return;
+  const est=estimate(l), d=diffPct(l), c=LOC[l.city];
+  const lo=est*.75, hi=est*1.25, pos=v=>Math.max(4,Math.min(96,(v-lo)/(hi-lo)*100));
+  const money2=l.deal==="rent"?`<div class="sect"><h3>Move-in cost</h3><div class="kv"><div><dt>Rent</dt><dd>₹${inr(l.price)}</dd></div><div><dt>Deposit (${c.deposit} mo)</dt><dd>₹${inr(l.price*c.deposit)}</dd></div><div><dt>Maintenance</dt><dd>~₹${inr(Math.round(l.area*3/100)*100)}/mo</dd></div></div></div>`
+   : `<div class="sect"><h3>Home loan EMI</h3><div class="emi">
+        <div><span class="out" id="emiOut"></span> <span class="note">per month</span></div>
+        <label for="dp">Down payment <input type="range" id="dp" min="10" max="60" step="5" value="20"><output id="dpo"></output></label>
+        <label for="ir">Interest rate <input type="range" id="ir" min="7" max="11" step="0.05" value="8.5"><output id="iro"></output></label>
+        <label for="yr">Tenure <input type="range" id="yr" min="5" max="30" step="1" value="20"><output id="yro"></output></label>
+        <div class="note" id="emiNote"></div></div></div>`;
+  $("#detail").innerHTML=`<div class="dlg">
+    <div class="hero">${art(l)}<button class="x" type="button" data-close aria-label="Close">×</button></div>
+    <div class="side">
+      <div><div class="price">${priceLine(l)}</div><h2>${esc(l.title)}</h2><div class="where">${l.loc}, ${l.city} · listed ${l.days===1?"yesterday":l.days+" days ago"}</div></div>
+      <dl class="kv" style="margin:0">
+        <div><dt>Config</dt><dd>${l.bhk?l.bhk+" BHK":"Plot"}</dd></div><div><dt>Super built-up</dt><dd>${inr(l.area)} sq ft</dd></div><div><dt>Bathrooms</dt><dd>${l.bhk?l.bath:"—"}</dd></div>
+        <div><dt>Floor</dt><dd>${l.floor}</dd></div><div><dt>Facing</dt><dd>${l.facing}</dd></div><div><dt>Furnishing</dt><dd>${l.furn}</dd></div>
+        <div><dt>Possession</dt><dd>${l.poss.replace("Under construction · ","Due ")}</dd></div><div><dt>Age</dt><dd>${l.age}</dd></div><div><dt>Carpet (est.)</dt><dd>${l.type==="Plot"?"—":inr(l.area*.75)+" sq ft"}</dd></div>
+      </dl>
+      ${l.deal==="buy"?`<div class="note">RERA ${rera(l)} <span class="sample">sample ID</span></div>`:""}
+      <div class="sect"><h3>Price vs ${l.loc} estimate</h3>
+        <div class="bar"><span class="mk est" style="left:50%">Estimate ${money(est)}</span></div>
+        <div class="bar" style="margin-top:4px"><span class="mk you" style="left:${pos(l.price)}%">This home ${money(l.price)}</span></div>
+        <div class="barlbl"><span>Good value</span><span>${pill(l).replace(/<[^>]+>/g,"")}</span><span>Premium</span></div>
+        <p class="note" style="margin:6px 0 0">Estimate uses an indicative ${l.loc} rate of ₹${inr(c.locs[l.loc][l.deal==="rent"?3:2])}/sq ft${l.deal==="rent"?"/month":""}${l.type==="Villa"||l.type==="Independent House"?", +8% for independent homes":l.type==="Plot"?", −5% for land":""}.</p>
+      </div>
+      ${money2}
+      <div class="sect"><h3>Amenities</h3><div class="amen">${l.am.map(a=>`<span>${esc(a)}</span>`).join("")}</div></div>
+      <div class="sect"><h3>Listed by</h3>
+        <div class="agent"><div class="av">${l.agent.split(" ").map(w=>w[0]).join("").slice(0,2)}</div><div class="who"><b>${esc(l.agent)}</b><div class="note">${esc(l.firm)}</div><div class="ph">${l.mine?esc(l.ph):"Sample agent · no real number"}</div></div>${l.mine?'<button class="btn ghost" type="button" id="copyPh">Copy number</button>':""}</div>
+      </div>
+      <form class="enq" id="enq">
+        <div class="sect" style="margin:0"><h3>Request a site visit</h3></div>
+        <div class="row2"><label class="field" for="en">Your name<input id="en" required autocomplete="name"></label><label class="field" for="ep">Mobile<input id="ep" required inputmode="tel" placeholder="98xxx xxxxx" autocomplete="tel"></label></div>
+        <label class="field" for="ew">Preferred visit<select id="ew"><option>This weekend</option><option>Weekday evening</option><option>Video walkthrough</option></select></label>
+        <label class="field" for="em">Message<textarea id="em" rows="2">Hi, I'm interested in this ${l.bhk?l.bhk+" BHK ":""}${l.type.toLowerCase()} in ${l.loc}. Is it still available?</textarea></label>
+        <div class="err" id="eerr" hidden></div>
+        <button class="btn" type="submit">Send enquiry</button>
+        <div class="note">Enquiries are kept on this device in the Enquiries list.</div>
+      </form>
+    </div></div>`;
+  const dlg=$("#detail"); dlg.dataset.id=id; dlg.showModal(); dlg.querySelector(".side").scrollTop=0;
+  if(l.deal==="buy"){ const upd=()=>{const dp=+$("#dp").value, ir=+$("#ir").value, yr=+$("#yr").value; const P=l.price*(1-dp/100), r=ir/1200, n=yr*12, e=P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+      $("#emiOut").textContent="₹"+inr(e); $("#dpo").textContent=dp+"%"; $("#iro").textContent=ir.toFixed(2)+"%"; $("#yro").textContent=yr+" yrs";
+      $("#emiNote").textContent=`Loan ₹${inr(P)} · down payment ₹${inr(l.price-P)} · total interest ₹${inr(e*n-P)}. Add ~7% stamp duty and registration in ${l.city}.`};
+    ["dp","ir","yr"].forEach(i=>$("#"+i).addEventListener("input",upd)); upd() }
+  if($("#copyPh")) $("#copyPh").onclick=()=>{ const t=l.ph; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast("Number copied")).catch(()=>{const s=getSelection(),rg=document.createRange();rg.selectNodeContents(dlg.querySelector(".ph"));s.removeAllRanges();s.addRange(rg);toast("Number selected — press Ctrl/⌘+C")}) };
+  $("#enq").onsubmit=e=>{ e.preventDefault(); const ph=$("#ep").value.replace(/\D/g,"").replace(/^91/,"");
+    if(!/^[6-9]\d{9}$/.test(ph)){ const er=$("#eerr"); er.textContent="Enter a 10-digit Indian mobile number starting with 6, 7, 8 or 9."; er.hidden=false; return }
+    leads.unshift({id:l.id,title:l.title,loc:l.loc,city:l.city,name:$("#en").value.trim(),phone:"+91 "+ph.slice(0,5)+" "+ph.slice(5),when:$("#ew").value,msg:$("#em").value.trim(),at:new Date().toISOString()});
+    store.set("leads",leads); $("#leadCount").textContent=leads.length;
+    $("#enq").outerHTML=`<div class="ok">Enquiry saved for ${esc(l.agent)}. You'll find it under Enquiries.</div>`; };
+}
+
+// ---- post property ----
+function openPost(){
+  const cities=Object.keys(LOC);
+  $("#post").innerHTML=`<div class="postdlg"><button class="x" type="button" data-close aria-label="Close">×</button>
+   <h2 style="font-family:var(--display);margin:0;font-size:24px">Post a property</h2>
+   <p class="note" style="margin:0">Listings you post appear at the top of results on this device.</p>
+   <form class="post" id="pf">
+     <div class="row2"><label class="field" for="pdeal">Listing for<select id="pdeal"><option value="buy">Sale</option><option value="rent">Rent</option></select></label>
+     <label class="field" for="ptype">Property type<select id="ptype"><option>Apartment</option><option>Villa</option><option>Independent House</option><option>Plot</option></select></label></div>
+     <div class="row2"><label class="field" for="pcity">City<select id="pcity">${cities.map(c=>`<option ${c===S.city?"selected":""}>${c}</option>`).join("")}</select></label>
+     <label class="field" for="ploc">Locality<select id="ploc"></select></label></div>
+     <label class="field" for="ptitle">Headline<input id="ptitle" required maxlength="70" placeholder="e.g. Corner 3BHK near metro station"></label>
+     <div class="row2"><label class="field" for="pbhk">BHK<select id="pbhk"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="0">Plot / NA</option></select></label>
+     <label class="field" for="parea">Super built-up (sq ft)<input id="parea" type="number" min="200" required value="1200"></label></div>
+     <div class="row2"><label class="field" for="pprice"><span id="pplabel">Price (₹)</span><input id="pprice" type="number" min="1000" required placeholder="e.g. 9500000"></label>
+     <label class="field" for="pposs">Possession<select id="pposs"><option>Ready to move</option><option>Under construction · Dec 2027</option><option>Available now</option></select></label></div>
+     <div class="note" id="phint"></div>
+     <div class="row2"><label class="field" for="pagent">Agent name<input id="pagent" required autocomplete="name"></label>
+     <label class="field" for="pph">Agent mobile<input id="pph" required inputmode="tel" placeholder="98xxx xxxxx"></label></div>
+     <div class="err" id="perr" hidden></div>
+     <button class="btn" type="submit">Publish listing</button>
+   </form></div>`;
+  const fillLoc=()=>{$("#ploc").innerHTML=Object.keys(LOC[$("#pcity").value].locs).map(n=>`<option>${n}</option>`).join(""); hint()};
+  const hint=()=>{ const r=LOC[$("#pcity").value].locs[$("#ploc").value], rent=$("#pdeal").value==="rent", a=+$("#parea").value||0;
+    $("#pplabel").textContent=rent?"Monthly rent (₹)":"Price (₹)";
+    $("#phint").textContent=a?`Locality guide: about ${rent?"₹"+inr(r[3]*a)+"/month":money(r[2]*a)} for ${inr(a)} sq ft in ${$("#ploc").value}.`:"" };
+  $("#pcity").onchange=fillLoc; ["ploc","pdeal","parea"].forEach(i=>$("#"+i).addEventListener("input",hint)); fillLoc();
+  $("#pf").onsubmit=e=>{ e.preventDefault(); const ph=$("#pph").value.replace(/\D/g,"").replace(/^91/,"");
+    if(!/^[6-9]\d{9}$/.test(ph)){ const er=$("#perr"); er.textContent="Enter a 10-digit Indian mobile number starting with 6, 7, 8 or 9."; er.hidden=false; return }
+    const type=$("#ptype").value, bhk=type==="Plot"?0:+$("#pbhk").value;
+    const l={id:"m"+Date.now(),mine:true,deal:$("#pdeal").value,city:$("#pcity").value,loc:$("#ploc").value,type,bhk,area:+$("#parea").value,price:+$("#pprice").value,title:$("#ptitle").value.trim(),
+      bath:Math.max(1,bhk),floor:"—",facing:"—",furn:"—",poss:$("#pposs").value,age:"—",days:0,agent:$("#pagent").value.trim(),firm:"Independent agent",ph:"+91 "+ph.slice(0,5)+" "+ph.slice(5),am:[],hue:(Date.now()/1000|0)%360};
+    mine.unshift(l); store.set("mine",mine); $("#post").close();
+    S.deal=l.deal; S.city=l.city; syncControls(); fillBudget(); render(); toast("Listing published"); };
+  $("#post").showModal();
+}
+
+function openLeads(){
+  $("#leads").innerHTML=`<div class="postdlg"><button class="x" type="button" data-close aria-label="Close">×</button>
+    <h2 style="font-family:var(--display);margin:0;font-size:24px">Enquiries</h2>
+    <p class="note" style="margin:0">Site-visit requests sent from listings on this device.</p>
+    <div class="leads">${leads.length?leads.map(x=>`<div class="lead"><b>${esc(x.name)} · ${esc(x.phone)}</b><div class="note">${esc(x.title)} — ${esc(x.loc)}, ${esc(x.city)} · ${esc(x.when)} · ${new Date(x.at).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})}</div><div>${esc(x.msg)}</div></div>`).join(""):`<div class="empty">No enquiries yet. Open any listing and use “Request a site visit”.</div>`}</div></div>`;
+  $("#leads").showModal();
+}
+
+function toast(t){ const el=$("#toast"); el.textContent=t; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true,2200) }
+function syncControls(){
+  document.querySelectorAll("[data-deal]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.deal===S.deal));
+  $("#city").value=S.city; $("#savedBtn").setAttribute("aria-pressed",S.savedOnly);
+}
+
+// ---- events ----
+setupControls(); render();
+document.querySelectorAll("[data-deal]").forEach(b=>b.onclick=()=>{S.deal=b.dataset.deal;syncControls();fillBudget();render()});
+$("#city").onchange=e=>{S.city=e.target.value;S.q="";$("#q").value="";render()};
+$("#q").oninput=e=>{S.q=e.target.value;render()};
+$("#bhkChips").onclick=e=>{const b=e.target.closest("[data-bhk]");if(!b)return;const v=b.dataset.bhk;S.bhk.has(v)?S.bhk.delete(v):S.bhk.add(v);b.setAttribute("aria-pressed",S.bhk.has(v));render()};
+["type","maxp","status","sort"].forEach(k=>$("#"+k).onchange=e=>{S[k]=e.target.value;render()});
+$("#savedBtn").onclick=()=>{S.savedOnly=!S.savedOnly;syncControls();render()};
+$("#postBtn").onclick=openPost; $("#leadsBtn").onclick=openLeads;
+$("#grid").addEventListener("click",e=>{
+  const h=e.target.closest("[data-save]"); if(h){ e.stopPropagation(); const id=h.dataset.save; saved.has(id)?saved.delete(id):saved.add(id); store.set("saved",[...saved]); h.setAttribute("aria-pressed",saved.has(id)); $("#savedCount").textContent=saved.size; toast(saved.has(id)?"Saved":"Removed from saved"); if(S.savedOnly)render(); return }
+  const c=e.target.closest(".card"); if(c) openDetail(c.dataset.id)});
+$("#grid").addEventListener("keydown",e=>{const c=e.target.closest(".card");if(c&&e.target===c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetail(c.dataset.id)}});
+$("#grid").addEventListener("mouseover",e=>{const c=e.target.closest(".card"); if(c&&c.dataset.id!==S.hot) setHot(c.dataset.id)});
+$("#map").addEventListener("click",e=>{const p=e.target.closest(".pin"); if(p) openDetail(p.dataset.id)});
+$("#map").addEventListener("keydown",e=>{const p=e.target.closest(".pin"); if(p&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetail(p.dataset.id)}});
+$("#map").addEventListener("mouseover",e=>{const p=e.target.closest(".pin"); if(p&&p.dataset.id!==S.hot){setHot(p.dataset.id); const c=document.querySelector(`.card[data-id="${p.dataset.id}"]`); if(c&&innerWidth>980) c.scrollIntoView({block:"nearest",behavior:"smooth"})}});
+document.querySelectorAll(".mobtabs [data-view]").forEach(b=>b.onclick=()=>{const v=b.dataset.view; $("main").dataset.view=v; document.querySelectorAll(".mobtabs [data-view]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.view===v))});
+document.querySelectorAll("dialog").forEach(d=>d.addEventListener("click",e=>{ if(e.target===d||e.target.closest("[data-close]")) d.close() }));
+</script>
+
+</body></html>

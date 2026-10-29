@@ -1,0 +1,19 @@
+{
+  "name": "aangan-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --env-file-if-exists=../.env --watch src/index.js --port=4000",
+    "start": "node --env-file-if-exists=../.env src/index.js",
+    "seed": "node src/reset-db.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "zod": "^4.6.7"
+  }
+}

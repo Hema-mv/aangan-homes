@@ -1,0 +1,23 @@
+{
+  "name": "aangan-homes",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Full-stack property listings app: React + Vite front end, Express REST API, SQLite, live updates over Server-Sent Events.",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server",
+    "test": "npm test -w server && npm test -w client",
+    "lint": "npm run lint -w client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
