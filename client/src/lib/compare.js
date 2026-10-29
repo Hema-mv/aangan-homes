@@ -26,7 +26,7 @@ export function compareRows(items, cities = []) {
   const rows = [
     { key: "price", label: "Price", text: (l) => money(l.price) + (buy ? "" : "/mo"), score: (l) => l.price, better: "min" },
     buy && { key: "psf", label: "Price per sq ft", text: (l) => "₹" + inr(l.price / l.area), score: (l) => l.price / l.area, better: "min" },
-    { key: "value", label: "vs locality estimate", kind: "pill", text: (l) => valueTag(l.diffPct).label, score: (l) => l.diffPct, better: "min" },
+    { key: "value", label: "vs estimate", kind: "pill", text: (l) => valueTag(l.diffPct).label, score: (l) => l.diffPct, better: "min" },
     buy
       ? { key: "emi", label: "Monthly EMI", text: (l) => "₹" + inr(buyCosts(l.price).monthly), score: (l) => buyCosts(l.price).monthly, better: "min" }
       : { key: "deposit", label: "Deposit", text: (l) => `₹${inr(l.price * dep(l))} (${dep(l)} mo)`, score: (l) => l.price * dep(l), better: "min" },

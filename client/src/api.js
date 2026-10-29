@@ -37,6 +37,7 @@ export const api = {
   cities: () => request("/cities"),
   listings: (filters, signal) => request("/listings" + qs(filters), { signal }).then((r) => r.items),
   listing: (id) => request(`/listings/${encodeURIComponent(id)}`),
+  comparables: (id) => request(`/listings/${encodeURIComponent(id)}/comparables`),
   createListing: (body) => request("/listings", { method: "POST", body }),
   createEnquiry: (listingId, body) => request(`/listings/${encodeURIComponent(listingId)}/enquiries`, { method: "POST", body }),
   enquiries: (ids) => (ids.length ? request("/enquiries" + qs({ ids })) : Promise.resolve([])),

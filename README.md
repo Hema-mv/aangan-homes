@@ -15,7 +15,8 @@ A full-stack property-listings app for Indian cities. You can search homes to bu
 ## Features
 
 - **Search and filter** by buy/rent, city, locality text, BHK, property type, budget and possession, with five sort orders. Filtering and sorting run on the server.
-- **Locality price estimate** for every listing (locality rate × area, adjusted for type), shown as "12% below estimate".
+- **Comparable-sales price estimate** for every listing, a simplified automated valuation model (see [How the estimate works](#how-the-estimate-works)). Shown as "12% below estimate" with a confidence level and the similar homes behind it.
+- **Post in any locality**: type an area that isn't listed and it's created on the spot, placed on the map, and priced from nearby listings until it has data of its own.
 - **Map view**: localities placed by real latitude and longitude, circles sized by ₹/sq ft, price pins linked to the cards on hover.
 - **Compare up to 3 homes**: price, ₹/sq ft, EMI, cash upfront or move-in cost, area, amenities and more. The best value in each row is highlighted, and "Show differences only" hides rows that are the same.
 - **EMI calculator** with sliders for down payment, interest rate and loan length.
@@ -35,9 +36,22 @@ App.jsx  ── fetch /api/listings?… ──►    routes → zod validation �
 
 - `server/src/app.js`: routes, middleware, error handling. It's exported as a factory so tests can run it against an in-memory database.
 - `server/src/repo.js`: every SQL query, all parameterised.
+- `server/src/valuation.js`: the comparable-sales model, pure functions with their own unit tests.
+- `server/src/db.js`: schema and versioned migrations (`PRAGMA user_version`), so existing databases upgrade in place.
 - `server/src/live.js`: the Server-Sent Events hub (presence, heartbeats, broadcasts).
 - `client/src/App.jsx`: app state, data loading and live-event handling.
 - `client/src/lib/`: pure logic (formatting, EMI, compare table) with unit tests next to it.
+
+## How the estimate works
+
+Each listing is valued from **similar homes in the same city**, in the spirit of a Zestimate:
+
+1. **Find comparables:** listings with the same deal (buy or rent) and a comparable property type (flats with flats, villas with independent houses, plots with plots).
+2. **Weight each one by similarity:** distance (using map coordinates), size (on a log scale, so 1,000 vs 1,400 sq ft counts the same as 2,000 vs 2,800), BHK difference, and how long ago it was listed. Weak matches are dropped, and the best 8 are kept.
+3. **Blend with a prior:** the locality's indicative ₹/sq ft rate, or the city median for a brand-new locality. It counts like 1.5 perfect comparables, so one odd listing can't swing the estimate.
+4. **Report how it was reached:** which source mostly drove the number, a confidence level, and the comparables themselves (`GET /api/listings/:id/comparables`), which the detail view lists.
+
+The model's settings live in `PARAMS` in `server/src/valuation.js`.
 
 ## Getting started
 
@@ -74,8 +88,8 @@ Set `PORT` and `DB_FILE` (see `.env.example`). Any Node host with a persistent d
 npm test           # API tests, then front-end tests
 ```
 
-- **API (18 tests):** filtering, sorting, LIKE-escaping, validation errors, phone normalisation, the locality/city foreign key, enquiry privacy, malformed JSON, and the SSE stream itself.
-- **Front end (26 tests):** currency formatting, EMI maths, value tags, compare-table "best" logic, and the compare tray component.
+- **API (32 tests):** filtering, sorting, LIKE-escaping, validation messages, phone normalisation, creating and matching localities, comparables, enquiry privacy, malformed JSON, the SSE stream and its heartbeat, the valuation model, and migrating an existing database.
+- **Front end (33 tests):** currency formatting, EMI maths, value tags, compare-table "best" logic, the API client (including a request-cancellation race), the live-connection watchdog, and the compare tray component.
 
 ## REST API
 
@@ -84,11 +98,14 @@ npm test           # API tests, then front-end tests
 | GET | `/api/health` | Liveness check plus number of connected clients |
 | GET | `/api/cities` | Cities with localities and indicative rates |
 | GET | `/api/listings` | Query: `deal`, `city`, `q`, `bhk` (e.g. `2,3,4+`), `type`, `maxPrice`, `status` (`ready`/`uc`), `sort` (`new`/`lo`/`hi`/`psf`/`deal`), `ids` |
-| GET | `/api/listings/:id` | One listing |
-| POST | `/api/listings` | Create a listing → `201`, broadcasts `listing:created` |
+| GET | `/api/listings/:id` | One listing, including `estimate`, `diffPct` and `estimateBasis` |
+| GET | `/api/listings/:id/comparables` | The similar homes behind the estimate, with distance and weight |
+| POST | `/api/listings` | Create a listing (a new `locality` is created if needed) → `201`, broadcasts `listing:created` |
 | POST | `/api/listings/:id/enquiries` | Request a site visit → `201`, broadcasts `listing:activity` (count only) |
 | GET | `/api/enquiries?ids=` | Your enquiries, by their UUIDs |
-| GET | `/api/events` | Server-Sent Events: `presence`, `listing:created`, `listing:activity` |
+| GET | `/api/events` | Server-Sent Events: `presence`, `ping` (every 25 s), `listing:created`, `listing:activity` |
+
+The client treats 60 seconds without any event as a dead connection. It then reconnects and refetches, because a proxy can drop the server side of a stream without telling the browser.
 
 Validation errors return `400` with per-field messages:
 

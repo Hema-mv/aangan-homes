@@ -92,6 +92,8 @@ export default function App() {
 
   const live = useLiveEvents({
     "listing:created": (l) => {
+      // Locality rates (and possibly a brand-new locality) change with every listing.
+      api.cities().then(setCities).catch(() => {});
       if (!mine.includes(l.id)) {
         showToast(`New ${l.deal === "buy" ? "for sale" : "to rent"} in ${l.locality}, ${l.city} · ${money(l.price)}`);
       }
@@ -101,6 +103,11 @@ export default function App() {
       }
     },
     "listing:activity": ({ id, enquiryCount }) => patchListing(id, { enquiryCount }),
+    // Back online after a dropped connection: catch up on anything we missed.
+    resync: () => {
+      api.cities().then(setCities).catch(() => {});
+      setReloadKey((k) => k + 1);
+    },
   });
 
   // ---- actions ----

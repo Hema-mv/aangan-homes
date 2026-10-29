@@ -2,11 +2,12 @@ import { test, describe, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { openDb } from "../src/db.js";
 import { createApp } from "../src/app.js";
+import { createLiveHub } from "../src/live.js";
 
 let server, base, live;
 
 before(async () => {
-  const built = createApp({ db: openDb(":memory:"), limitWrites: false });
+  const built = createApp({ db: openDb(":memory:"), limitWrites: false, live: createLiveHub({ heartbeatMs: 100 }) });
   live = built.live;
   server = built.app.listen(0);
   await new Promise((r) => server.once("listening", r));
@@ -64,10 +65,22 @@ describe("GET /api/listings", () => {
     assert.deepEqual(body.items.map((l) => l.id).sort(), ["s1", "s14", "s8"]);
   });
 
-  test("computes the locality estimate", async () => {
-    const { body } = await get("/listings/s1"); // Adyar 1650 sq ft @ ₹17,000
-    assert.equal(body.estimate, 1650 * 17000);
+  test("explains each estimate", async () => {
+    const { body } = await get("/listings/s1"); // Adyar 1650 sq ft, indicative ₹17,000/sq ft
+    assert.ok(Math.abs(body.estimate / (1650 * 17000) - 1) < 0.15, "anchored on the locality rate");
+    assert.equal(body.estimateBasis.priorSource, "locality");
+    assert.ok(["high", "medium", "low"].includes(body.estimateBasis.confidence));
     assert.equal(body.phone, null, "sample listings never expose a phone number");
+  });
+
+  test("lists the comparables behind an estimate", async () => {
+    const { status, body } = await get("/listings/s23/comparables"); // Baner 2BHK
+    assert.equal(status, 200);
+    assert.equal(typeof body.estimate, "number");
+    for (const c of body.comps) {
+      assert.ok(c.weight > 0 && c.distanceKm >= 0 && c.psf > 0);
+      assert.notEqual(c.id, "s23", "never its own comparable");
+    }
   });
 
   test("rejects invalid query values", async () => {
@@ -100,12 +113,36 @@ describe("POST /api/listings", () => {
     const { status, body } = await post("/listings", { ...validListing, phone: "12345", title: "Hi", price: -5 });
     assert.equal(status, 400);
     assert.deepEqual(Object.keys(body.fields).sort(), ["phone", "price", "title"]);
+    assert.equal(body.fields.price, "Enter a price of at least ₹1,000", "plain-English messages, not Zod defaults");
   });
 
-  test("rejects a locality that doesn't belong to the city", async () => {
-    const { status, body } = await post("/listings", { ...validListing, locality: "Adyar" });
-    assert.equal(status, 400);
-    assert.ok(body.fields.locality);
+  test("matches an existing locality case-insensitively", async () => {
+    const { body } = await post("/listings", { ...validListing, locality: "  baner " });
+    assert.equal(body.locality, "Baner");
+    assert.equal(body.newLocality, false);
+  });
+
+  test("creates a new locality on first use and places it in the city", async () => {
+    const { status, body } = await post("/listings", { ...validListing, locality: "Aundh", price: 12_000_000 });
+    assert.equal(status, 201);
+    assert.equal(body.newLocality, true);
+    assert.ok(Math.abs(body.lat - 18.56) < 0.1 && Math.abs(body.lng - 73.85) < 0.15, "near Pune");
+    assert.equal(body.estimateBasis.priorSource, "city", "no indicative rate yet");
+
+    const pune = (await get("/cities")).body.find((c) => c.name === "Pune");
+    const aundh = pune.localities.find((l) => l.name === "Aundh");
+    assert.equal(aundh.source, "user");
+    assert.equal(aundh.rateSource, "listings");
+    assert.equal(aundh.saleRate, 12000, "rate observed from its own listing");
+  });
+
+  test("rejects junk locality names and unknown cities", async () => {
+    const bad = await post("/listings", { ...validListing, locality: "<script>" });
+    assert.equal(bad.status, 400);
+    assert.ok(bad.body.fields.locality);
+    const city = await post("/listings", { ...validListing, city: "Atlantis" });
+    assert.equal(city.status, 400);
+    assert.ok(city.body.fields.city);
   });
 
   test("stores text as-is (escaping is the renderer's job)", async () => {
@@ -161,6 +198,8 @@ describe("GET /api/events (live updates)", () => {
     assert.ok((await waitFor("presence")).online >= 1);
     await post("/listings", { ...validListing, title: "Live listing broadcast" });
     assert.equal((await waitFor("listing:created")).title, "Live listing broadcast");
+    // Heartbeats are named events the browser's watchdog can observe.
+    assert.equal(typeof (await waitFor("ping")).t, "number");
     ctrl.abort();
   });
 });

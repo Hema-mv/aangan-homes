@@ -60,17 +60,61 @@ export default function DetailDialog({ listing: l, city, open, onClose, comparin
 
 const KV = ({ k, v }) => <div><dt>{k}</dt><dd>{v}</dd></div>;
 
+const BASIS_TEXT = {
+  comps: (n) => `Estimated mainly from ${n} similar ${n === 1 ? "home" : "homes"} nearby, blended with the area's typical rate.`,
+  locality: () => "Few similar homes nearby yet, so this leans on the area's indicative rate.",
+  city: () => "New area with no history yet, so this starts from the city-wide typical rate. It sharpens as more homes are listed here.",
+};
+
 function EstimateBar({ listing: l }) {
   const lo = l.estimate * 0.75, hi = l.estimate * 1.25;
   const pos = Math.max(4, Math.min(96, ((l.price - lo) / (hi - lo)) * 100));
-  const adj = l.type === "Villa" || l.type === "Independent House" ? ", +8% for independent homes" : l.type === "Plot" ? ", −5% for land" : "";
+  const b = l.estimateBasis;
   return (
     <div className="sect">
-      <h3>Price vs {l.locality} estimate</h3>
+      <h3>Price vs estimate <span className={"conf " + b.confidence}>{b.confidence} confidence</span></h3>
       <div className="bar"><span className="mk est" style={{ left: "50%" }}>Estimate {money(l.estimate)}</span></div>
-      <div className="bar" style={{ marginTop: 4 }}><span className="mk you" style={{ left: pos + "%" }}>This home {money(l.price)}</span></div>
+      <div className="bar" style={{ marginTop: 4 }}>
+        {/* Near either end, anchor the label to that side so it never overflows the bar. */}
+        <span className={"mk you" + (pos > 75 ? " end" : pos < 25 ? " start" : "")} style={{ left: pos + "%" }}>This home {money(l.price)}</span>
+      </div>
       <div className="barlbl"><span>Good value</span><span>{valueTag(l.diffPct).label}</span><span>Premium</span></div>
-      <p className="note" style={{ margin: "6px 0 0" }}>Estimate = indicative {l.locality} rate × area{adj}.</p>
+      <p className="note" style={{ margin: "6px 0 0" }}>{BASIS_TEXT[b.method](b.compCount)}</p>
+      {b.compCount > 0 && <Comparables key={l.id} listing={l} />}
+    </div>
+  );
+}
+
+function Comparables({ listing: l }) {
+  const [data, setData] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const toggle = () => {
+    setOpen((o) => !o);
+    if (!data && !failed) api.comparables(l.id).then(setData, () => setFailed(true));
+  };
+  const maxW = data ? Math.max(...data.comps.map((c) => c.weight)) : 1;
+
+  return (
+    <div className="comps">
+      <button className="linkbtn" type="button" aria-expanded={open} onClick={toggle}>
+        {open ? "Hide" : "Show"} the {l.estimateBasis.compCount} similar {l.estimateBasis.compCount === 1 ? "home" : "homes"} used
+      </button>
+      {open && (failed ? <div className="err">Couldn't load comparables.</div> : !data ? <div className="note">Loading…</div> : (
+        <ul>
+          {data.comps.map((c) => (
+            <li key={c.id}>
+              <span className="cw" style={{ "--w": c.weight / maxW }} title={`Similarity ${Math.round(c.weight * 100)}%`} />
+              <span className="ct2">
+                <b>{c.bhk ? `${c.bhk} BHK` : c.type} · {inr(c.area)} sq ft</b>
+                <span className="note">{c.locality}{c.distanceKm > 0.1 ? ` · ${c.distanceKm} km away` : " · same area"} · {daysAgo(c.daysListed)}</span>
+              </span>
+              <span className="cp">₹{inr(c.psf)}<small>/sq ft{l.deal === "rent" ? "/mo" : ""}</small></span>
+            </li>
+          ))}
+        </ul>
+      ))}
     </div>
   );
 }

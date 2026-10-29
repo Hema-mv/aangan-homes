@@ -50,7 +50,8 @@ export function createApp({ db, staticDir, limitWrites = true, live = createLive
   api.get("/health", (_req, res) => res.json({ ok: true, online: live.size }));
 
   api.get("/cities", (_req, res) => {
-    res.set("Cache-Control", "public, max-age=300").json(repo.cities());
+    // Not cached: users can add localities, and their rates move as listings arrive.
+    res.set("Cache-Control", "no-cache").json(repo.cities());
   });
 
   api.get("/listings", (req, res) => {
@@ -65,14 +66,18 @@ export function createApp({ db, staticDir, limitWrites = true, live = createLive
     res.json(l);
   });
 
+  api.get("/listings/:id/comparables", (req, res) => {
+    const c = repo.comparables(req.params.id);
+    if (!c) throw new HttpError(404, "Listing not found");
+    res.json(c);
+  });
+
   api.post("/listings", writeLimiter, (req, res) => {
     const input = parse(newListing, req.body);
-    if (!repo.locality(input.city, input.locality)) {
-      throw new HttpError(400, "Validation failed", { locality: "Unknown locality for this city" });
-    }
-    const listing = repo.createListing(input);
-    live.broadcast("listing:created", listing);
-    res.status(201).location(`/api/listings/${listing.id}`).json(listing);
+    if (!repo.cityExists(input.city)) throw new HttpError(400, "Validation failed", { city: "We don't cover this city yet" });
+    const { listing, newLocality } = repo.createListing(input);
+    live.broadcast("listing:created", { ...listing, newLocality });
+    res.status(201).location(`/api/listings/${listing.id}`).json({ ...listing, newLocality });
   });
 
   api.post("/listings/:id/enquiries", writeLimiter, (req, res) => {

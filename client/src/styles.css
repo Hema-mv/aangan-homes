@@ -138,6 +138,11 @@ dialog::backdrop { background:rgba(8,20,26,.55) }
 .bar .mk::after { content:""; position:absolute; left:50%; top:18px; width:2px; height:14px; background:currentColor; transform:translateX(-50%) }
 .bar .mk.est { color:var(--muted) }
 .bar .mk.you { color:var(--brand) }
+.bar .mk.end { transform:translateX(-100%) }
+.bar .mk.end::after { left:100% }
+.bar .mk.start { transform:none }
+.bar .mk.start::after { left:0 }
+.dlg .side { overflow-x:hidden }
 .barlbl { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); gap:8px }
 .emi { background:var(--sunk); border-radius:12px; padding:14px; display:grid; gap:10px }
 .emi .out { font-family:var(--display); font-size:24px; font-weight:800 }
@@ -208,6 +213,20 @@ body:has(main.has-tray) .toast { bottom:calc(96px + env(safe-area-inset-bottom,0
 .cmpt.diffonly tr.same { display:none }
 .cmpfoot { display:flex; gap:6px 16px; flex-wrap:wrap; font-size:13px; color:var(--muted) }
 .cmpfoot i { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:5px }
+
+/* estimate explanation */
+.conf { margin-left:6px; padding:1px 7px; border-radius:999px; font-size:10px; letter-spacing:.06em; background:var(--sunk); color:var(--muted) }
+.conf.high { background:var(--good-soft); color:var(--good) }
+.conf.low { background:var(--accent-soft); color:var(--ink) }
+.comps { margin-top:6px }
+.comps .linkbtn { padding-left:0 }
+.comps ul { list-style:none; margin:6px 0 0; padding:0; display:grid; gap:6px }
+.comps li { display:grid; grid-template-columns:6px minmax(0,1fr) auto; gap:10px; align-items:center; background:var(--sunk); border-radius:8px; padding:8px 10px }
+.comps .cw { width:6px; height:28px; border-radius:3px; background:linear-gradient(to top, var(--brand) calc(var(--w) * 100%), var(--line) 0) }
+.comps .ct2 { display:grid; min-width:0; font-size:13px; line-height:1.3 }
+.comps .ct2 .note { font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.comps .cp { font-weight:700; font-size:14px; white-space:nowrap }
+.comps .cp small { font-weight:500; color:var(--muted); font-size:11px }
 
 .crash { max-width:480px; margin:15vh auto; padding:0 16px; text-align:center }
 .crash h1 { font-family:var(--display); letter-spacing:-.02em }

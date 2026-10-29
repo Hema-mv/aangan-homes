@@ -17,7 +17,8 @@ export function createLiveHub({ heartbeatMs = 25_000 } = {}) {
     res.write("retry: 3000\n\n");
     clients.add(res);
     presence();
-    const beat = setInterval(() => res.write(": ping\n\n"), heartbeatMs);
+    // A named event (not an SSE comment) so the browser can see it and detect a dead stream.
+    const beat = setInterval(() => send(res, "ping", { t: Date.now() }), heartbeatMs);
     req.on("close", () => {
       clearInterval(beat);
       clients.delete(res);

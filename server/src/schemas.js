@@ -36,22 +36,29 @@ export const listingQuery = z.object({
 export const newListing = z.object({
   deal: z.enum(["buy", "rent"]),
   city: z.string().max(40),
-  locality: z.string().max(60),
-  type: z.enum(TYPES),
-  bhk: z.coerce.number().int().min(0).max(10),
-  area: z.coerce.number().int().min(100).max(100_000),
-  price: z.coerce.number().int().min(1000).max(10_000_000_000),
-  title: z.string().trim().min(5, "Headline needs at least 5 characters").max(70),
-  possession: z.enum(POSSESSION),
-  agent: z.string().trim().min(2).max(60),
+  // Free text: an existing locality is matched case-insensitively, otherwise a new one is created.
+  locality: z.string().trim().transform((s) => s.replace(/\s+/g, " "))
+    .pipe(z.string()
+      .min(2, "Enter a locality")
+      .max(40, "Keep the locality under 40 characters")
+      .regex(/^[\p{L}\p{N}][\p{L}\p{N} .,'&()-]*$/u, "Use letters, numbers, spaces and . , ' & ( ) - only")),
+  type: z.enum(TYPES, "Choose a property type"),
+  bhk: z.coerce.number().int().min(0).max(10, "Up to 10 BHK"),
+  area: z.coerce.number("Enter the area in sq ft").int("Use a whole number of sq ft")
+    .min(100, "Area must be at least 100 sq ft").max(100_000, "Area must be under 1,00,000 sq ft"),
+  price: z.coerce.number("Enter a price").int("Use a whole number of rupees")
+    .min(1000, "Enter a price of at least ₹1,000").max(10_000_000_000, "That price looks too high"),
+  title: z.string().trim().min(5, "Headline needs at least 5 characters").max(70, "Keep the headline under 70 characters"),
+  possession: z.enum(POSSESSION, "Choose when it's available"),
+  agent: z.string().trim().min(2, "Enter the agent's name").max(60, "Keep the name under 60 characters"),
   phone,
 }).transform((l) => (l.type === "Plot" ? { ...l, bhk: 0 } : l));
 
 export const newEnquiry = z.object({
-  name: z.string().trim().min(2, "Enter your name").max(60),
+  name: z.string().trim().min(2, "Enter your name").max(60, "Keep the name under 60 characters"),
   phone,
-  visit: z.enum(VISITS),
-  message: z.string().trim().max(500).default(""),
+  visit: z.enum(VISITS, "Choose a visit option"),
+  message: z.string().trim().max(500, "Keep the message under 500 characters").default(""),
 });
 
 /** Turns a ZodError into { field: message } for the client to show next to inputs. */

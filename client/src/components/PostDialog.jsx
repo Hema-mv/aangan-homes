@@ -15,26 +15,26 @@ export default function PostDialog({ open, onClose, cities, defaultCity, onCreat
 function PostForm({ cities, defaultCity, onClose, onCreated }) {
   const [f, setF] = useState(() => {
     const city = cities.find((c) => c.name === defaultCity) ?? cities[0];
-    return { deal: "buy", type: "Apartment", city: city.name, locality: city.localities[0].name, title: "", bhk: "2",
+    return { deal: "buy", type: "Apartment", city: city.name, locality: "", title: "", bhk: "2",
       area: "1200", price: "", possession: "Ready to move", agent: "", phone: "" };
   });
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const city = cities.find((c) => c.name === f.city);
-  const set = (k) => (e) => {
-    const v = e.target.value;
-    setF((prev) => k === "city"
-      ? { ...prev, city: v, locality: cities.find((c) => c.name === v).localities[0].name }
-      : { ...prev, [k]: v });
-  };
+  const set = (k) => (e) => setF((prev) => ({ ...prev, [k]: e.target.value }));
 
   const hint = useMemo(() => {
-    const loc = city?.localities.find((l) => l.name === f.locality), a = +f.area;
-    if (!loc || !a) return "";
+    const name = f.locality.trim().replace(/\s+/g, " "), a = +f.area;
+    if (name.length < 2) return "";
+    const loc = city?.localities.find((l) => l.name.toLowerCase() === name.toLowerCase());
+    if (!loc) return `“${name}” is new to ${f.city}. We'll add it, and estimate prices from similar homes nearby.`;
+    const rate = f.deal === "rent" ? loc.rentRate : loc.saleRate;
+    if (!rate || !a) return "";
+    const basis = loc.rateSource === "listings" ? "from current listings" : "indicative";
     return f.deal === "rent"
-      ? `Locality guide: about ₹${inr(loc.rentRate * a)}/month for ${inr(a)} sq ft in ${loc.name}.`
-      : `Locality guide: about ${money(loc.saleRate * a)} for ${inr(a)} sq ft in ${loc.name}.`;
-  }, [city, f.locality, f.area, f.deal]);
+      ? `Locality guide (${basis}): about ₹${inr(rate * a)}/month for ${inr(a)} sq ft in ${loc.name}.`
+      : `Locality guide (${basis}): about ${money(rate * a)} for ${inr(a)} sq ft in ${loc.name}.`;
+  }, [city, f.city, f.locality, f.area, f.deal]);
 
   async function submit(e) {
     e.preventDefault();
@@ -60,8 +60,12 @@ function PostForm({ cities, defaultCity, onClose, onCreated }) {
           <Field id="ptype" label="Property type"><select id="ptype" value={f.type} onChange={set("type")}>{["Apartment", "Villa", "Independent House", "Plot"].map((t) => <option key={t}>{t}</option>)}</select></Field>
         </div>
         <div className="row2">
-          <Field id="pcity" label="City"><select id="pcity" value={f.city} onChange={set("city")}>{cities.map((c) => <option key={c.name}>{c.name}</option>)}</select></Field>
-          <Field id="ploc" label="Locality" error={errors.locality}><select id="ploc" value={f.locality} onChange={set("locality")}>{city.localities.map((l) => <option key={l.name}>{l.name}</option>)}</select></Field>
+          <Field id="pcity" label="City" error={errors.city}><select id="pcity" value={f.city} onChange={set("city")}>{cities.map((c) => <option key={c.name}>{c.name}</option>)}</select></Field>
+          <Field id="ploc" label="Locality" error={errors.locality}>
+            <input id="ploc" list="ploc-list" required maxLength={40} autoComplete="off" placeholder="Pick or type any area"
+              value={f.locality} onChange={set("locality")} aria-invalid={!!errors.locality} />
+            <datalist id="ploc-list">{city.localities.map((l) => <option key={l.name} value={l.name} />)}</datalist>
+          </Field>
         </div>
         <Field id="ptitle" label="Headline" error={errors.title}>
           <input id="ptitle" required maxLength={70} placeholder="e.g. Corner 3BHK near metro station" value={f.title} onChange={set("title")} />

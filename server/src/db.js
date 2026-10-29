@@ -56,12 +56,62 @@ CREATE TABLE IF NOT EXISTS enquiries (
 CREATE INDEX IF NOT EXISTS idx_enquiries_listing ON enquiries(listing_id);
 `;
 
-/** Opens (and if needed creates + seeds) the database. Pass ":memory:" for tests. */
+/**
+ * Schema migrations, applied in order and tracked with PRAGMA user_version.
+ * Never edit a released migration; add a new one.
+ */
+const MIGRATIONS = [
+  // 1: initial schema
+  (db) => db.exec(SCHEMA),
+  // 2: localities can be added by users when they post. Their rates start unknown
+  //    (NULL) and are filled in from nearby listings by the valuation model.
+  (db) => db.exec(`
+    CREATE TABLE localities_v2 (
+      city      TEXT NOT NULL REFERENCES cities(name),
+      name      TEXT NOT NULL COLLATE NOCASE,
+      lat       REAL NOT NULL,
+      lng       REAL NOT NULL,
+      sale_rate INTEGER,              -- indicative ₹/sq ft; NULL for user-added localities
+      rent_rate INTEGER,
+      source    TEXT NOT NULL DEFAULT 'seed' CHECK (source IN ('seed','user')),
+      created_at TEXT,
+      PRIMARY KEY (city, name)
+    );
+    INSERT INTO localities_v2 (city, name, lat, lng, sale_rate, rent_rate, source)
+      SELECT city, name, lat, lng, sale_rate, rent_rate, 'seed' FROM localities;
+    DROP TABLE localities;
+    ALTER TABLE localities_v2 RENAME TO localities;
+    CREATE INDEX IF NOT EXISTS idx_listings_locality ON listings(city, locality);
+  `),
+];
+
+function migrate(db) {
+  const current = db.prepare("PRAGMA user_version").get().user_version;
+  if (current >= MIGRATIONS.length) return;
+  // Table rebuilds need FK enforcement off; it is re-checked before commit.
+  db.exec("PRAGMA foreign_keys = OFF");
+  db.exec("BEGIN");
+  try {
+    for (let v = current; v < MIGRATIONS.length; v++) MIGRATIONS[v](db);
+    const broken = db.prepare("PRAGMA foreign_key_check").all();
+    if (broken.length) throw new Error(`Migration left ${broken.length} broken foreign keys`);
+    db.exec(`PRAGMA user_version = ${MIGRATIONS.length}`);
+    db.exec("COMMIT");
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  } finally {
+    db.exec("PRAGMA foreign_keys = ON");
+  }
+}
+
+/** Opens (and if needed creates, migrates and seeds) the database. Pass ":memory:" for tests. */
 export function openDb(file = ":memory:", { seed = true } = {}) {
   if (file !== ":memory:") mkdirSync(dirname(file), { recursive: true });
   const db = new DatabaseSync(file);
-  db.exec("PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;");
-  db.exec(SCHEMA);
+  db.exec("PRAGMA journal_mode = WAL;");
+  migrate(db);
+  db.exec("PRAGMA foreign_keys = ON;");
   if (seed && db.prepare("SELECT COUNT(*) AS n FROM cities").get().n === 0) seedDb(db);
   return db;
 }

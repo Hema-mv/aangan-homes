@@ -23,7 +23,7 @@ export function emi(P, annualPct, years) {
 
 /** How a price compares with its locality estimate. */
 export function valueTag(diffPct) {
-  if (Math.abs(diffPct) < 3) return { kind: "flat", label: "In line with locality estimate" };
+  if (Math.abs(diffPct) < 3) return { kind: "flat", label: "In line with estimate" };
   return diffPct < 0
     ? { kind: "good", label: `▼ ${Math.abs(diffPct).toFixed(0)}% below estimate` }
     : { kind: "bad", label: `▲ ${diffPct.toFixed(0)}% above estimate` };
