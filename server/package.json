@@ -8,7 +8,7 @@
     "dev": "node --env-file-if-exists=../.env --watch src/index.js --port=4000",
     "start": "node --env-file-if-exists=../.env src/index.js",
     "seed": "node src/reset-db.js",
-    "test": "node --test test/"
+    "test": "node --test"
   },
   "dependencies": {
     "express": "^5.1.0",
